@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react'; 
 import { useRouter, useSearchParams } from 'next/navigation'; 
 import { TextField, Button, FormControlLabel, Checkbox, Typography, Box, Alert } from '@mui/material';
 import Link from 'next/link';
@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams(); 
+  const searchParams = useSearchParams();
   const autoLoggedOut = searchParams.get('autologgedout');
 
   useEffect(() => {
@@ -57,7 +57,7 @@ export default function LoginPage() {
         } else {
           Cookies.setItem('authToken', token);
           Cookies.setItem('user', JSON.stringify(user));
-          localStorage.setItem('keepLoggedIn', 'false'); 
+          localStorage.setItem('keepLoggedIn', 'false');
         }
 
         router.push('/dashboard');
@@ -86,7 +86,7 @@ export default function LoginPage() {
           Sign in to your account
         </Typography>
 
-        {error && ( 
+        {error && (
           <Alert severity="error" className="mb-4">
             {error}
           </Alert>
