@@ -1,72 +1,72 @@
-"use client";
+'use client';
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import {
-  TextField,
-  Button,
-  FormControlLabel,
-  Checkbox,
-  Typography,
-  Box,
-  Alert,
-} from "@mui/material";
-import Link from "next/link";
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation'; 
+import { TextField, Button, FormControlLabel, Checkbox, Typography, Box, Alert } from '@mui/material';
+import Link from 'next/link';
+import Cookies from 'js-cookies';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
-  const [error, setError] = useState("");
+  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams(); 
+  const autoLoggedOut = searchParams.get('autologgedout');
+
+  useEffect(() => {
+    if (autoLoggedOut) {
+      setError('You have been logged out due to inactivity.');
+      router.replace('/login', undefined, { shallow: true });
+    }
+  }, [autoLoggedOut, router]);
+
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
+    setError('');
     setLoading(true);
 
     if (!email || !password) {
-      setError("Please enter both email and password.");
+      setError('Please enter both email and password.');
       setLoading(false);
       return;
     }
 
     try {
-      const response = await fetch("/api/login", {
-        method: "POST",
+      const response = await fetch('/api/login', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ email, password }),
       });
 
-      let data;
-      try {
-        data = await response.json();
-      } catch {
-        throw new Error("Invalid JSON response");
-      }
+      const data = await response.json();
 
       if (response.ok) {
+        const token = data.token;
+        const user = data.user;
+
         if (keepLoggedIn) {
-          localStorage.setItem("authToken", data.token);
-          localStorage.setItem("user", JSON.stringify(data.user));
-          localStorage.setItem("keepLoggedIn", "true");
+          Cookies.setItem('authToken', token, { expires: 7 });
+          Cookies.setItem('user', JSON.stringify(user), { expires: 7 });
+          localStorage.setItem('keepLoggedIn', 'true');
         } else {
-          sessionStorage.setItem("authToken", data.token);
-          sessionStorage.setItem("user", JSON.stringify(data.user));
-          sessionStorage.setItem("keepLoggedIn", "false"); 
+          Cookies.setItem('authToken', token);
+          Cookies.setItem('user', JSON.stringify(user));
+          localStorage.setItem('keepLoggedIn', 'false'); 
         }
-        router.push("/dashboard"); 
+
+        router.push('/dashboard');
       } else {
-        setError(
-          data.message || "Login failed. Please check your credentials."
-        );
+        setError(data.message || 'Login failed. Please check your credentials.');
       }
     } catch (err) {
-      console.error("Login error:", err);
-      setError("An unexpected error occurred. Please try again.");
+      console.error('Login error:', err);
+      setError('An unexpected error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -79,18 +79,14 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="p-8 bg-white rounded-lg shadow-xl w-full max-w-md space-y-6"
       >
-        <Typography
-          variant="h4"
-          component="h1"
-          className="text-center font-extrabold text-gray-800"
-        >
+        <Typography variant="h4" component="h1" className="text-center font-extrabold text-gray-800">
           Welcome Back!
         </Typography>
         <Typography variant="body2" className="text-center text-gray-600 mb-4">
           Sign in to your account
         </Typography>
 
-        {error && (
+        {error && ( 
           <Alert severity="error" className="mb-4">
             {error}
           </Alert>
@@ -137,14 +133,12 @@ export default function LoginPage() {
           disabled={loading}
           className="py-3 text-lg font-semibold"
         >
-          {loading ? "Logging In..." : "Login"}
+          {loading ? 'Logging In...' : 'Login'}
         </Button>
 
         <Typography variant="body2" className="text-center text-gray-600 mt-4">
-          Don't have an account?{" "}
-          <Link
-            href="/register"
-            className="text-blue-600 hover:underline font-medium"
+          Don't have an account?{' '}
+          <Link href="/register" className="text-blue-600 hover:underline font-medium"
           >
             Register here
           </Link>
