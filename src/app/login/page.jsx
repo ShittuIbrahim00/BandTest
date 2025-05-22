@@ -13,8 +13,8 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const autoLoggedOut = searchParams.get('autologgedout');
+  // const searchParams = useSearchParams();
+  const {autoLoggedOut : autoLoggedOut} = router.query;
 
   useEffect(() => {
     if (autoLoggedOut) {
